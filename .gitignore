@@ -1,0 +1,12 @@
+*.mp4
+__pycache__/
+*.pyc
+*.log
+*.tmp
+.DS_Store
+outputs/*
+renders/*
+test_renders/*
+*api_key.py
+videos/
+VNC/

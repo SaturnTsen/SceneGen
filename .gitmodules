@@ -1,0 +1,9 @@
+[submodule "Genesis"]
+	path = Genesis
+	url = https://github.com/Genesis-Embodied-AI/Genesis
+[submodule "Gaussian-Property"]
+	path = Gaussian-Property
+	url = https://github.com/xxlbigbrother/Gaussian-Property
+[submodule "sam2"]
+	path = sam2
+	url = https://github.com/facebookresearch/sam2
