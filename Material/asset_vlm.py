@@ -43,8 +43,16 @@ def query_vlm(
         material_list = "wood, metal, plastic, glass, fabric, foam, food, ceramic, paper, leather"
         material_list = material_list.split(", ")
         material_library = "{" + ", ".join(material_list) + "}"
-        prompt = f"""Provided a picture. The left image is the original picture of the object (Original Image), and the middle image is a partial segmentation diagram (Mask Overlay), mask is in red. The right image is a partial of the object. 
-        Based on the image, firstly provide a brief caption of the part. Secondly, describe what the part is made of (provide the major one). Finally, we combine what the object is and the material of the object to predict the hardness of the part. Choose whether to use Shore A hardness or Shore D hardness depending on the material. You may provide a range of values for hardness instead of a single value. 
+        prompt = f"""Provided a picture. The first image is the front view of the object (Asset Front View), 
+        the second image is the original picture of the object (Original Image), 
+        and the third image is a partial segmentation diagram (Mask Overlay), mask is in red. 
+        The last image is a partial of the object. 
+        
+        Based on the image, firstly provide a brief caption of the part. 
+        Secondly, describe what the part is made of (provide the major one). 
+        Finally, we combine what the object is and the material of the object to predict the hardness of the part. 
+        Choose whether to use Shore A hardness or Shore D hardness depending on the material. 
+        You may provide a range of values for hardness instead of a single value. 
 
         Format Requirement:
         You must provide your answer as a (brief caption of the part, material of the part, hardness, Shore A/D) pair. Do not include any other text in your answer, as it will be parsed by a code script later. 

@@ -22,3 +22,8 @@ SEGMENTATION:
     crop_n_points_downscale_factor: 1
     min_mask_region_area: 900
     use_m2m: false
+
+VLM:
+    vlm_type: "GPT4V"
+    vlm_api_key: ""
+    vlm_model_name: "gpt-4o-mini"

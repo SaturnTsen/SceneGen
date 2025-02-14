@@ -1,29 +1,32 @@
 import os
 import hydra
+import logging
 from tqdm import tqdm
 import numpy as np
 from asset_visualiser import render_views
 from asset_segmentation import sam_image
+from asset_vlm import query_vlm
 from omegaconf import DictConfig, OmegaConf
 from sam2.build_sam import build_sam2
-from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 from utils.sam_utils import create, seed_everything, save_gpt_input
-
-import logging
-logging.getLogger().setLevel(logging.ERROR)
 
 from hydra.core.global_hydra import GlobalHydra
 GlobalHydra.instance().clear()
+os.environ["DISPLAY"] = ":1"
+import pyglet
+pyglet.options['headless'] = True
 
 class AssetsMaterialPipeline:
     def __init__(
             self,
             GLB_folder_path: str,
-            config: DictConfig
+            config: DictConfig,
+            seed: int = 42
         ): 
         self.path = GLB_folder_path
         self.config = config
         self.render_asset = self.config.RENDER.out_dir
+        self.seed = seed
 
     def asset_visualiser(self) -> None:
         GLB_folder_path = self.path
@@ -72,15 +75,7 @@ class AssetsMaterialPipeline:
         min_mask_region_area = self.config.SEGMENTATION.min_mask_region_area
         use_m2m = self.config.SEGMENTATION.use_m2m
 
-        # if model_cfg == "sam2_hiera_b+":
-        #     model_cfg = "sam2_hiera_b+.yaml"
-        # elif model_cfg == "sam2_hiera_l":
-        #     model_cfg = "sam2_hiera_l.yaml"
-        # elif model_cfg == "sam2_hiera_s":
-        #     model_cfg = "sam2_hiera_s.yaml"
-        # elif model_cfg == "sam2_hiera_t":
-        #     model_cfg = "sam2_hiera_t.yaml"
-        # model_cfg = "configs/sam2/sam2_hiera_b+.yaml"
+        logging.getLogger().setLevel(logging.ERROR)
         sam2 = build_sam2(
             model_cfg,
             sam2_checkpoint,
@@ -104,11 +99,29 @@ class AssetsMaterialPipeline:
         )
 
         save_gpt_input(self.render_asset)
+
+    
+    def asset_vlm(self) -> None:
+        vlm_type = self.config.VLM.vlm_type
+        vlm_api_key = self.config.VLM.vlm_api_key
+        vlm_model_name = self.config.VLM.vlm_model_name
+
+        logging.getLogger().setLevel(logging.ERROR)
+
+        query_vlm(
+            render_images_path=self.render_asset,
+            vlm_type=vlm_type,
+            vlm_api_key=vlm_api_key,
+            model=vlm_model_name,
+        )
     
     def Pipeline(self) -> None:
+        if self.seed:
+            seed_everything(self.seed)
         self.asset_visualiser()
         self.asset_segmentation()
-    
+        self.asset_vlm()
+
     def __repr__(self):
         return f"AssetsMaterialPipeline(GLB_folder_path={self.path}, config={self.config})"
 

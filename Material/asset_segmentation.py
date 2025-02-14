@@ -43,7 +43,7 @@ def sam_image(
         use_m2m=use_m2m,
     )
 
-    for asset in os.listdir(render_images_path):
+    for idx, asset in tqdm(enumerate(os.listdir(render_images_path)), desc="Segmenting assets", unit=" asset"):
         asset_path = os.path.join(render_images_path, asset)
         img_folder = os.path.join(asset_path, 'images')
         data_list = sorted(os.listdir(img_folder))
@@ -75,6 +75,9 @@ def sam_image(
 
         # Generate segmentation maps
         seg_map_vis = create(imgs, alphas, data_list, save_folder, mask_generator)
+    
+    sam2.to('cpu')
+    del sam2
 
 
 if __name__ == '__main__':
@@ -86,5 +89,5 @@ if __name__ == '__main__':
     seed_everything(42)
 
     sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=False)
-    # sam_image(sam2, assets_path)
+    sam_image(sam2, assets_path)
     save_gpt_input(assets_path)

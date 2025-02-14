@@ -9,6 +9,7 @@ from utils.asset_processor import glb_asset_rotator
 from matplotlib import pyplot as plt
 os.environ['DISPLAY'] = ':1'
 
+
 def render_views(
         glb_path: str,
         out_dir: str = 'renders',

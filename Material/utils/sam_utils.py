@@ -46,7 +46,7 @@ def create(image_list, alpha_list, data_list, save_folder, mask_generator):
     """Generates segmentation maps for each image in the list."""
     assert image_list is not None, "image_list must be provided to generate features"
     mask_generator.predictor.model.to('cuda')
-    for i, img in tqdm(enumerate(image_list), desc="Processing images", unit=" image"):
+    for i, img in tqdm(enumerate(image_list), desc="Processing images", unit=" image", leave=False):
         alpha = alpha_list[i]
         save_path = os.path.join(save_folder, data_list[i].split('.')[0])
         seg_map_vis = sam_encoder(img.unsqueeze(0), alpha, save_path, mask_generator)
@@ -195,6 +195,9 @@ def sam_encoder(image, alpha, save_path, mask_generator):
             continue
         seg_map[mask['segmentation']] = kk
 
+    background = seg_map[0, 0]
+    seg_map[seg_map == background] = -1
+
     seg_map[alpha == 0] = -1
     seg_map_vis = vis_segmap_sam(seg_map, vis_seg_path)
 
@@ -213,7 +216,7 @@ def sam_encoder(image, alpha, save_path, mask_generator):
 
 def save_gpt_input(base_path):
     all_cases = os.listdir(base_path)
-    for idx, path in tqdm(enumerate(all_cases), desc="Processing cases", unit=" case"):
+    for idx, path in tqdm(enumerate(all_cases), desc="Processing VLM input", unit=" asset"):
         case_name = os.path.join(base_path, path)
 
         image_base = f"{case_name}/images"
@@ -225,6 +228,9 @@ def save_gpt_input(base_path):
         os.makedirs(base_gpt_test_path, exist_ok=True)
 
         image_list = sorted(os.listdir(image_base))
+
+        asset_front_view = cv2.imread(os.path.join(image_base, image_list[0]))
+        asset_front_view = cv2.cvtColor(asset_front_view, cv2.COLOR_BGR2RGB)
 
         for i, _ in tqdm(enumerate(range(number_view)), desc="Processing views", unit=" view", leave=False):
             
@@ -259,24 +265,29 @@ def save_gpt_input(base_path):
                 part_image = cv2.cvtColor(part_image, cv2.COLOR_BGR2RGB)
 
                 # Create plot
-                fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 8))  # 1 row, 3 columns
+                fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(32, 8))  # 1 row, 3 columns
 
-                # Display original image on the left
-                ax1.imshow(image)
-                ax1.set_title('Original Image')
-                ax1.axis('off')  # Turn off axis
+                # Display asset's front view on the first
+                ax1.imshow(asset_front_view)
+                ax1.set_title('Asset Front View')
+                ax1.axis('off')
 
-                # Display mask overlay on the middle
+                # Display original image on the second
                 ax2.imshow(image)
-                masked_image = np.ma.masked_where(mask != label, mask)
-                ax2.imshow(masked_image, cmap=cmap, alpha=0.4, vmin=np.min(mask), vmax=np.max(mask))
-                ax2.set_title('Mask Overlay')
-                ax2.axis('off')
+                ax2.set_title('Original Image')
+                ax2.axis('off')  # Turn off axis
 
-                # Display part image on the right
-                ax3.imshow(part_image)
-                ax3.set_title('Part Image')
+                # Display mask overlay on the third
+                ax3.imshow(image)
+                masked_image = np.ma.masked_where(mask != label, mask)
+                ax3.imshow(masked_image, cmap=cmap, alpha=0.4, vmin=np.min(mask), vmax=np.max(mask))
+                ax3.set_title('Mask Overlay')
                 ax3.axis('off')
+
+                # Display part image on the last
+                ax4.imshow(part_image)
+                ax4.set_title('Part Image')
+                ax4.axis('off')
 
                 plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.1, hspace=0.1)
 
