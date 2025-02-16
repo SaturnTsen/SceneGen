@@ -1,15 +1,15 @@
 [submodule "Genesis"]
-	path = Genesis
+	path = deps/Genesis
 	url = https://github.com/Genesis-Embodied-AI/Genesis
 [submodule "Gaussian-Property"]
-	path = Gaussian-Property
+	path = deps/Gaussian-Property
 	url = https://github.com/xxlbigbrother/Gaussian-Property
 [submodule "sam2"]
-	path = sam2
+	path = deps/sam2
 	url = https://github.com/facebookresearch/sam2
 [submodule "TRELLIS"]
-	path = TRELLIS
+	path = deps/TRELLIS
 	url = https://github.com/microsoft/TRELLIS
 [submodule "Hunyuan3D-2"]
-	path = Hunyuan3D-2
+	path = deps/Hunyuan3D-2
 	url = https://github.com/Tencent/Hunyuan3D-2
